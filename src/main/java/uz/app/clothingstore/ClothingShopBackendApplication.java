@@ -8,6 +8,7 @@ public class ClothingShopBackendApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ClothingShopBackendApplication.class, args);
+        System.out.println("Salom");
     }
 
 }
