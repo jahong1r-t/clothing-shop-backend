@@ -35,10 +35,11 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authorization = request.getHeader("Authorization");
 
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            log.debug("Authorization header is missing or invalid. URL: {}, Header: {}", request.getRequestURI(), authorization);
-            filterChain.doFilter(request, response);
+        log.debug("Incoming request. URL: {}, Method: {}, Authorization: {}",
+                request.getRequestURI(), request.getMethod(), authorization);
 
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -52,10 +53,10 @@ public class JwtFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+
+                log.debug("JWT token is valid for user: {}", username);
             }
-
         }
-
 
         filterChain.doFilter(request, response);
     }
