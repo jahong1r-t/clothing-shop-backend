@@ -69,6 +69,11 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
         <!-- JWT: Token asosidagi authentication uchun -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -127,6 +132,12 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>1.5.5.Final</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.17.1</version>
         </dependency>
 
         <!-- SpringDoc OpenAPI: API dokumentatsiya va Swagger UI uchun -->

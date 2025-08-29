@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @MappedSuperclass
 @EqualsAndHashCode(callSuper = true)
-public abstract class AbsLongEntity extends Auditable {
+public abstract class AbsLongEntity extends Auditable  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

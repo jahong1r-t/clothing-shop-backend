@@ -25,6 +25,9 @@ public class RedisConfig {
         Map<String, RedisCacheConfiguration> configurations = new HashMap<>();
         configurations.put("user_sign_up_cache", defaultConfig.entryTtl(Duration.ofMinutes(15)));
         configurations.put("email_confirm_code", defaultConfig.entryTtl(Duration.ofMinutes(2)));
+        configurations.put("refresh_token", defaultConfig.entryTtl(Duration.ofDays(7)));
+        configurations.put("blacklist_token", defaultConfig.entryTtl(Duration.ofMinutes(15)));
+        configurations.put("user", defaultConfig.entryTtl(Duration.ofHours(1)));
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConfig)

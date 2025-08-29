@@ -1,5 +1,6 @@
 package uz.app.clothingstore.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uz.app.clothingstore.service.impl.CacheService;
 
 import java.io.IOException;
 
@@ -21,12 +23,14 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
+    private final CacheService cacheService;
     private final UserDetailsService userDetailsService;
 
     @Lazy
     @Autowired
-    public JwtFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtFilter(JwtService jwtService, CacheService cacheService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
+        this.cacheService = cacheService;
         this.userDetailsService = userDetailsService;
     }
 
@@ -35,8 +39,9 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authorization = request.getHeader("Authorization");
 
-        log.info("URL: {}, Method: {}, Authorization: {}",
-                request.getRequestURI(), request.getMethod(), authorization);
+        log.info("Authorization: {} URL: {}, Method: {}",
+                authorization != null ? authorization.substring(0, 6) + "..." : "No-Auth-Header",
+                request.getRequestURI(), request.getMethod());
 
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -45,6 +50,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = authorization.substring(7);
         String username = jwtService.extractUserFromJwtToken(token);
+
+        if (cacheService.isBlacklisted(token)) {
+            throw new JwtException("Token has been invalidated (logout)");
+        }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);

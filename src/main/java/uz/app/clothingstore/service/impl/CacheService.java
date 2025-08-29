@@ -1,5 +1,6 @@
 package uz.app.clothingstore.service.impl;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -34,6 +35,34 @@ public class CacheService {
 
     @CacheEvict(value = "email_confirm_code", key = "#email")
     public void removeConfirmCodeFromCache(String email) {
+    }
+
+    @CachePut(value = "refresh_token", key = "#userId")
+    public String setRefreshTokenToCache(Long userId, String refreshToken) {
+        return refreshToken;
+    }
+
+    @Cacheable(value = "refresh_token", key = "#userId")
+    public String getRefreshTokenFromCache(Long userId) {
+        return null;
+    }
+
+    @CacheEvict(value = "refresh_token", key = "#userId")
+    public void deleteRefreshToken(Long userId) {
+    }
+
+    public String hashToken(String token) {
+        return DigestUtils.sha256Hex(token);
+    }
+
+    @CachePut(value = "blacklist_token", key = "#root.target.hashToken(#accessToken)")
+    public Boolean addTokenToBlacklist(String accessToken) {
+        return true;
+    }
+
+    @Cacheable(value = "blacklist_token", key = "#root.target.hashToken(#accessToken)")
+    public boolean isBlacklisted(String accessToken) {
+        return false;
     }
 
 }

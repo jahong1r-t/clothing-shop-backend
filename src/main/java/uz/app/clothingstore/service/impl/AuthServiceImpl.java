@@ -1,5 +1,6 @@
 package uz.app.clothingstore.service.impl;
 
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -7,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uz.app.clothingstore.entity.User;
@@ -71,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtService.generateJwtAccessToken(user);
         String refreshToken = jwtService.generateJwtRefreshToken(user);
+        cacheService.setRefreshTokenToCache(user.getId(), refreshToken);
 
         return ApiResponse.success(
                 "You have signed in successfully",
@@ -79,8 +82,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<?> logout() {
-        return null;
+    public ApiResponse<?> logout(Long userId, String header) {
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new JwtException("Invalid token");
+        }
+
+//        cacheService.addTokenToBlacklist(header.substring(7));
+        cacheService.deleteRefreshToken(userId);
+        return ApiResponse.success("Logged out successfully", null);
     }
 
     @Override
@@ -104,6 +113,7 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtService.generateJwtAccessToken(user);
         String refreshToken = jwtService.generateJwtRefreshToken(user);
+        cacheService.setRefreshTokenToCache(user.getId(), refreshToken);
 
         return ApiResponse.success(
                 "Email confirmed successfully",
@@ -126,18 +136,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<?> refreshAccessToken() {
-        return null;
-    }
+    public ApiResponse<?> refreshAccessToken(Long userId, String header) {
+        String token = cacheService.getRefreshTokenFromCache(userId);
 
-    @Override
-    public ApiResponse<?> loginWithGoogle() {
-        return null;
-    }
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new JwtException("Invalid token");
+        }
 
-    @Override
-    public ApiResponse<?> loginWithGitHub() {
-        return null;
+        if (token == null || !token.equals(header.substring(7))) {
+            return ApiResponse.error("Refresh token is invalid or expired");
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new UsernameNotFoundException("User not found"));
+
+        String jwtAccessToken = jwtService.generateJwtAccessToken(user);
+
+        return ApiResponse.success(
+                "New access token generated",
+                Map.of("accessToken", jwtAccessToken));
     }
 
     private String sendConfirmCodeToEmail(String email) {

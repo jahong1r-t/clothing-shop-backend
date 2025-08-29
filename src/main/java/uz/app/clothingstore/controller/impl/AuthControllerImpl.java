@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uz.app.clothingstore.controller.AuthController;
+import uz.app.clothingstore.entity.User;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.ConfirmEmailReqDTO;
+import uz.app.clothingstore.payload.req.ResendCodeReqDTO;
 import uz.app.clothingstore.payload.req.SignInReqDTO;
 import uz.app.clothingstore.payload.req.SignUpReqDTO;
 import uz.app.clothingstore.service.AuthService;
@@ -29,8 +31,9 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    public ResponseEntity<?> logout() {
-        return null;
+    public ResponseEntity<?> logout(User user, String header) {
+        ApiResponse<?> apiResponse = authService.logout(user.getId(), header);
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 
     @Override
@@ -40,22 +43,14 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    public ResponseEntity<?> resendConfirmCode() {
-        return null;
+    public ResponseEntity<?> resendConfirmCode(ResendCodeReqDTO resendCodeReqDTO) {
+        ApiResponse<?> apiResponse = authService.resendConfirmCode(resendCodeReqDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 
     @Override
-    public ResponseEntity<?> refreshAccessToken() {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<?> loginWithGoogle() {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<?> loginWithGitHub() {
-        return null;
+    public ResponseEntity<?> refreshAccessToken(User user, String header) {
+        ApiResponse<?> apiResponse = authService.refreshAccessToken(user.getId(), header);
+        return ResponseEntity.ok().body(apiResponse);
     }
 }

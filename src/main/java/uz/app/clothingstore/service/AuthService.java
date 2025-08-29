@@ -11,15 +11,11 @@ public interface AuthService {
 
     ApiResponse<?> signIn(SignInReqDTO signInReqDTO);
 
-    ApiResponse<?> logout();
+    ApiResponse<?> logout(Long userId, String header);
 
     ApiResponse<?> confirmEmail(ConfirmEmailReqDTO confirmEmailReqDTO);
 
     ApiResponse<?> resendConfirmCode(ResendCodeReqDTO resendCodeReqDTO);
 
-    ApiResponse<?> refreshAccessToken();
-
-    ApiResponse<?> loginWithGoogle();
-
-    ApiResponse<?> loginWithGitHub();
+    ApiResponse<?> refreshAccessToken(Long userId, String header);
 }
