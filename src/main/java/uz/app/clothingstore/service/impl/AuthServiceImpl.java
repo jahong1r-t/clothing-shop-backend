@@ -17,6 +17,7 @@ import uz.app.clothingstore.exception.SignUpSessionExpiredException;
 import uz.app.clothingstore.mapper.UserMapper;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.ConfirmEmailReqDTO;
+import uz.app.clothingstore.payload.req.ResendCodeReqDTO;
 import uz.app.clothingstore.payload.req.SignInReqDTO;
 import uz.app.clothingstore.payload.req.SignUpReqDTO;
 import uz.app.clothingstore.repostory.UserRepository;
@@ -112,8 +113,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<?> resendConfirmCode() {
-        return null;
+    public ApiResponse<?> resendConfirmCode(ResendCodeReqDTO resendCodeReqDTO) {
+        User user = Optional.ofNullable(cacheService.getUserFromCache(resendCodeReqDTO.getEmail()))
+                .orElseThrow(() -> new SignUpSessionExpiredException("Sign-up session expired. Please try again."));
+
+        String code = sendConfirmCodeToEmail(user.getEmail());
+        cacheService.setEmailConfirmCodeToCache(user.getEmail(), code);
+
+        return ApiResponse.success(
+                "Verification code sent to your email",
+                Map.of("email", user.getEmail()));
     }
 
     @Override

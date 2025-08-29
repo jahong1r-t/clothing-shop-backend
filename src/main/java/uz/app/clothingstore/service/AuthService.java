@@ -2,6 +2,7 @@ package uz.app.clothingstore.service;
 
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.ConfirmEmailReqDTO;
+import uz.app.clothingstore.payload.req.ResendCodeReqDTO;
 import uz.app.clothingstore.payload.req.SignInReqDTO;
 import uz.app.clothingstore.payload.req.SignUpReqDTO;
 
@@ -14,7 +15,7 @@ public interface AuthService {
 
     ApiResponse<?> confirmEmail(ConfirmEmailReqDTO confirmEmailReqDTO);
 
-    ApiResponse<?> resendConfirmCode();
+    ApiResponse<?> resendConfirmCode(ResendCodeReqDTO resendCodeReqDTO);
 
     ApiResponse<?> refreshAccessToken();
 
