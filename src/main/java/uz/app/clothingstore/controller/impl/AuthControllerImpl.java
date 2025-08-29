@@ -24,7 +24,8 @@ public class AuthControllerImpl implements AuthController {
 
     @Override
     public ResponseEntity<?> signIn(SignInReqDTO signInReqDTO) {
-        return null;
+        ApiResponse<?> apiResponse = authService.signIn(signInReqDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 
     @Override

@@ -3,6 +3,10 @@ package uz.app.clothingstore.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uz.app.clothingstore.entity.User;
@@ -25,8 +29,8 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-
 public class AuthServiceImpl implements AuthService {
+    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
@@ -54,7 +58,23 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ApiResponse<?> signIn(SignInReqDTO signInReqDTO) {
-        return null;
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        signInReqDTO.getEmail(),
+                        signInReqDTO.getPassword()
+                )
+        );
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = (User) userDetails;
+
+        String accessToken = jwtService.generateJwtAccessToken(user);
+        String refreshToken = jwtService.generateJwtRefreshToken(user);
+
+        return ApiResponse.success(
+                "You have signed in successfully",
+                Map.of("accessToken", accessToken,
+                        "refreshToken", refreshToken));
     }
 
     @Override
