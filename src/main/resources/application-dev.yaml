@@ -1,0 +1,35 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clothing_store
+    username: postgres
+    password: root123
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 1000
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jahongirtorayev1507@gmail.com
+    password: kmlw ctqs fwde secw
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+jwt:
+  secret: fP5pR8sX2v9qL3nP6aBcDeFgHiJkLmNo
+  access-token-expiration: 900000       # 15 min
+  refresh-token-expiration: 604800000   # 7 day
+
