@@ -115,6 +115,11 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-rest</artifactId>
+        </dependency>
+
         <!-- AWS SDK S3: fayl yuklash va olish (cloud storage) uchun -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
