@@ -6,5 +6,6 @@ import uz.app.clothingstore.entity.Category;
 @Projection(name = "categoryProjection", types = Category.class)
 public interface CategoryProjection {
     Long getId();
+
     String getName();
 }

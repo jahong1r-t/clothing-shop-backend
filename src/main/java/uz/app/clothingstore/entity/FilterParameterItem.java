@@ -1,7 +1,6 @@
 package uz.app.clothingstore.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import uz.app.clothingstore.entity.abs.AbsLongEntity;
 
@@ -13,8 +12,10 @@ import uz.app.clothingstore.entity.abs.AbsLongEntity;
 @Builder
 @EqualsAndHashCode(callSuper = true)
 public class FilterParameterItem extends AbsLongEntity {
+    @Column(nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "filter_parameter_id", nullable = false)
     private FilterParameter parameter;
 }
