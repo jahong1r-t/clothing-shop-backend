@@ -10,6 +10,7 @@ import uz.app.clothingstore.entity.abs.AbsLongEntity;
 @Entity
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -25,7 +26,7 @@ public class Product extends AbsLongEntity {
     private Double price;
 
     @Column(nullable = false)
-    private Integer stock;
+    private Integer quantity;
 
     @Column(nullable = false)
     private boolean isDiscounted;
@@ -34,6 +35,10 @@ public class Product extends AbsLongEntity {
 
     private Double discountPercent;
 
+    @Column(nullable = false)
+    private Boolean isExistVariant;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
+
 }

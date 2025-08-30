@@ -20,14 +20,18 @@ public class ProductStatistic extends AbsLongEntity {
     private Float rating = 0.f;
 
     @Column(nullable = false)
-    private Integer totalReviews;
+    private Integer totalReviews = 0;
 
     @Column(nullable = false)
-    private Integer totalSold;
+    private Integer totalSold = 0;
 
     @Column(nullable = false)
-    private Integer totalSoldLastWeek;
+    private Integer totalSoldLastWeek = 0;
 
     @Column(nullable = false)
-    private Integer totalSoldLastMonth;
+    private Integer totalSoldLastMonth = 0;
+
+    public ProductStatistic(Product product) {
+        this.product = product;
+    }
 }

@@ -74,4 +74,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error("JWT processing error: " + ex.getMessage()));
     }
+
+    @ExceptionHandler(ItemNotFoundException.class)
+    public ResponseEntity<?> handleItemNotFoundException(ItemNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
 }

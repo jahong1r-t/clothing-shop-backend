@@ -25,7 +25,7 @@ public class ProductVariant extends AbsLongEntity {
     private List<FilterParameterItem> items;
 
     @Column(nullable = false)
-    private Integer stock;
+    private Integer quantity;
 
     private Double price;
 }
