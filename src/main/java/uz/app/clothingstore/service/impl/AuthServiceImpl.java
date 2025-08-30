@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
             throw new JwtException("Invalid token");
         }
 
-//        cacheService.addTokenToBlacklist(header.substring(7));
+        cacheService.addTokenToBlacklist(header.substring(7));
         cacheService.deleteRefreshToken(userId);
         return ApiResponse.success("Logged out successfully", null);
     }
@@ -165,15 +165,12 @@ public class AuthServiceImpl implements AuthService {
         simpleMailMessage.setSubject("Shop.co – Verify Your Email");
         simpleMailMessage.setText("""
                 Hello,
-                
                 Thank you for joining Shop.co 👗🛍️
-                
                 Your verification code:
                 
                 🔑 %s
                 
                 This code is valid for 2 minutes.
-                
                 – Shop.co Team
                 """.formatted(confirmCode));
 
