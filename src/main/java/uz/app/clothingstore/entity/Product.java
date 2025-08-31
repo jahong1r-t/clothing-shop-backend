@@ -29,16 +29,10 @@ public class Product extends AbsLongEntity {
     private Integer quantity;
 
     @Column(nullable = false)
-    private boolean isDiscounted;
-
-    private Double oldPrice;
-
-    private Double discountPercent;
-
-    @Column(nullable = false)
     private Boolean isExistVariant;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
-
 }
+
+

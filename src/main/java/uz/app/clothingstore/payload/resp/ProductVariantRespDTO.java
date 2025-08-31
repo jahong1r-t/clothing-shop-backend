@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 @Builder
 public class ProductVariantRespDTO {
+    private Long id;
     private Integer quantity;
     private Double price;
     private List<Long> filterItemIds;

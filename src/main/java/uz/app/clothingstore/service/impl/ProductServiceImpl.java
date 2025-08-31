@@ -2,17 +2,24 @@ package uz.app.clothingstore.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import uz.app.clothingstore.entity.*;
+import org.springframework.data.domain.Pageable;
+import uz.app.clothingstore.entity.abs.AbsLongEntity;
 import uz.app.clothingstore.exception.ItemNotFoundException;
 import uz.app.clothingstore.mapper.ProductMapper;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.ProductReqDTO;
 import uz.app.clothingstore.payload.req.ProductVariantReqDTO;
+import uz.app.clothingstore.payload.resp.ProductRespDTO;
+import uz.app.clothingstore.payload.resp.ProductVariantRespDTO;
 import uz.app.clothingstore.repostory.*;
 import uz.app.clothingstore.service.ProductService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,8 +79,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<?> getProductList() {
-        return null;
+    public ApiResponse<?> getProductList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Product> productPage = productRepository.findAll(pageable);
+
+        List<ProductRespDTO> productDTOs = productPage
+                .stream()
+                .map(productMapper::toRespDTO)
+                .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("products", productDTOs);
+        response.put("currentPage", productPage.getNumber());
+        response.put("totalItems", productPage.getTotalElements());
+        response.put("totalPages", productPage.getTotalPages());
+
+        return ApiResponse.success("Product list", response);
     }
 
     @Override
@@ -81,8 +102,54 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
+        ProductRespDTO dto = productMapper.toRespDTO(product);
 
+        if (product.getIsExistVariant()) {
+            List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository.findAllByProduct_Id(product.getId())
+                    .stream()
+                    .map(v -> {
+                        List<Long> list = v.getItems()
+                                .stream()
+                                .map(AbsLongEntity::getId)
+                                .toList();
 
-        return null;
+                        return ProductVariantRespDTO.builder()
+                                .id(v.getId())
+                                .price(v.getPrice())
+                                .quantity(v.getQuantity())
+                                .filterItemIds(list)
+                                .build();
+                    }).toList();
+
+            dto.setVariants(variantRespDTOS);
+        }
+
+        return ApiResponse.success("", dto);
     }
+
+    @Override
+    public ApiResponse<?> getProductVariantsByProductId(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+
+        List<ProductVariantRespDTO> variantDTOs = productVariantRepository.findAllByProduct_Id(productId)
+                .stream()
+                .map(v -> {
+                    List<Long> itemIds = v.getItems()
+                            .stream()
+                            .map(AbsLongEntity::getId)
+                            .toList();
+
+                    return ProductVariantRespDTO.builder()
+                            .id(v.getId())
+                            .price(v.getPrice())
+                            .quantity(v.getQuantity())
+                            .filterItemIds(itemIds)
+                            .build();
+                })
+                .toList();
+
+        return ApiResponse.success("Product variants list", variantDTOs);
+    }
+
 }
