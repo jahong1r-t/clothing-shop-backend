@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/api/v1/statistic")
 public interface ProductStatsController {
+
     @GetMapping("/products/{productId}")
     ResponseEntity<?> getProductStatistic(@PathVariable Long productId);
 
