@@ -49,15 +49,7 @@ public class ProductServiceImpl implements ProductService {
         if (product.getIsExistVariant()) {
             List<ProductVariantReqDTO> variantsDTO = productReqDTO.getVariants();
 
-            if (variantsDTO == null || variantsDTO.isEmpty()) {
-                throw new IllegalArgumentException("Variants must be provided when isExistVariant is true");
-            }
-
             List<ProductVariant> variants = variantsDTO.stream().map(dto -> {
-                if (dto.getFilterItemIds() == null || dto.getFilterItemIds().isEmpty()) {
-                    throw new IllegalArgumentException("Filter items must not be empty for each variant");
-                }
-
                 List<FilterParameterItem> items = filterParameterItemRepository.findAllById(dto.getFilterItemIds());
                 if (items.size() != dto.getFilterItemIds().size()) {
                     throw new ItemNotFoundException("Some filter items not found for variant");
