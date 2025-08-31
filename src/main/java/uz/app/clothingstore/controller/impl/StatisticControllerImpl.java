@@ -20,7 +20,8 @@ public class StatisticControllerImpl implements StatisticController {
 
     @Override
     public ResponseEntity<?> getAllProductStatistics(int page, int size) {
-        return null;
+        ApiResponse<?> apiResponse = statisticsService.getAllProductStatistics(page, size);
+        return ResponseEntity.ok(apiResponse);
     }
 
 
