@@ -62,8 +62,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     @Override
     public ApiResponse<?> updateProductVariant(UpdateVariantReqDTO dto) {
-        ProductVariant variant = productVariantRepository
-                .findActiveById(dto.getVariantId())
+        ProductVariant variant = productVariantRepository.findActiveById(dto.getVariantId())
                 .orElseThrow(() -> new ItemNotFoundException("Product variant not found"));
 
         List<FilterParameterItem> items = filterParameterItemRepository.findAllById(dto.getFilterItemIds());
@@ -105,8 +104,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         productRepository.findActiveById(productId)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
-        List<ProductVariantRespDTO> variantDTOs = productVariantRepository
-                .findAllActiveByProductId(productId)
+        List<ProductVariantRespDTO> variantDTOs = productVariantRepository.findAllActiveByProductId(productId)
                 .stream()
                 .map(v -> {
                     List<Long> itemIds = v.getItems()

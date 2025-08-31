@@ -163,8 +163,7 @@ public class ProductServiceImpl implements ProductService {
         ProductRespDTO dto = productMapper.toRespDTO(product);
 
         if (product.getIsExistVariant()) {
-            List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository
-                    .findAllActiveByProductId(product.getId())
+            List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository.findAllActiveByProductId(product.getId())
                     .stream()
                     .map(v -> {
                         List<Long> list = v.getItems()

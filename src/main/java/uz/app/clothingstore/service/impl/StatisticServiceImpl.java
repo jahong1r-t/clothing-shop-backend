@@ -39,8 +39,7 @@ public class StatisticServiceImpl implements StatisticsService {
     public ApiResponse<?> getAllProductStatistics(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<ProductStatistic> statisticsPage = productStatisticRepository
-                .findAllActiveStatistics(pageable);
+        Page<ProductStatistic> statisticsPage = productStatisticRepository.findAllActiveStatistics(pageable);
 
         Page<StatisticRespDTO> dtoPage = statisticsPage.map(s -> {
             StatisticRespDTO dto = statisticMapper.toDTO(s);
