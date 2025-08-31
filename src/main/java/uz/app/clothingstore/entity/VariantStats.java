@@ -30,5 +30,9 @@ public class VariantStats extends AbsLongEntity {
 
     @Column(nullable = false)
     private Integer totalSoldLastMonth = 0;
+
+    public VariantStats(ProductVariant variant) {
+        this.variant = variant;
+    }
 }
 

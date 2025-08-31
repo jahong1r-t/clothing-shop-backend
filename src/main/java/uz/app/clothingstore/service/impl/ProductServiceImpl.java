@@ -34,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductStatisticRepository productStatisticRepository;
     private final FilterParameterItemRepository filterParameterItemRepository;
+    private final ProductVariantStatsRepository productVariantStatsRepository;
 
     @Override
     @Transactional
@@ -62,8 +63,11 @@ public class ProductServiceImpl implements ProductService {
                         .items(items)
                         .build();
             }).toList();
-
             productVariantRepository.saveAll(variants);
+
+            for (ProductVariant variant : variants) {
+                productVariantStatsRepository.save(new VariantStats(variant));
+            }
         }
 
         productStatisticRepository.save(new ProductStatistic(product));
