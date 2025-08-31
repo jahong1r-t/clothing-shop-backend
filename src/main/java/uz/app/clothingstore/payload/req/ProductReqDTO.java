@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @Setter
 public class ProductReqDTO {
-
     @NotBlank(message = "Product name must not be empty")
     private String name;
 

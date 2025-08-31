@@ -78,6 +78,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<?> getProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+
+
+
         return null;
     }
 }
