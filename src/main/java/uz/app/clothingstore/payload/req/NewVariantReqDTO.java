@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class VariantReqDTO {
+public class NewVariantReqDTO {
     @NotNull(message = "Product id must not null")
     private Long productId;
 

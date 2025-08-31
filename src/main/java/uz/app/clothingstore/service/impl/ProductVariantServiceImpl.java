@@ -10,7 +10,8 @@ import uz.app.clothingstore.entity.abs.AbsLongEntity;
 import uz.app.clothingstore.exception.ItemNotFoundException;
 import uz.app.clothingstore.mapper.ProductVariantMapper;
 import uz.app.clothingstore.payload.ApiResponse;
-import uz.app.clothingstore.payload.req.VariantReqDTO;
+import uz.app.clothingstore.payload.req.NewVariantReqDTO;
+import uz.app.clothingstore.payload.req.UpdateVariantReqDTO;
 import uz.app.clothingstore.payload.resp.ProductVariantRespDTO;
 import uz.app.clothingstore.repostory.FilterParameterItemRepository;
 import uz.app.clothingstore.repostory.ProductRepository;
@@ -30,8 +31,8 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     @Override
     @Transactional
-    public ApiResponse<?> addProductVariant(VariantReqDTO variantReqDTO) {
-        Product product = productRepository.findByIdAndIsDeletedFalseAndIsActiveTrue(variantReqDTO.getProductId())
+    public ApiResponse<?> addProductVariant(NewVariantReqDTO newVariantReqDTO) {
+        Product product = productRepository.findByIdAndIsDeletedFalseAndIsActiveTrue(newVariantReqDTO.getProductId())
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
         if (!product.getIsExistVariant()) {
@@ -39,12 +40,12 @@ public class ProductVariantServiceImpl implements ProductVariantService {
             productRepository.save(product);
         }
 
-        List<FilterParameterItem> items = filterParameterItemRepository.findAllById(variantReqDTO.getFilterItemIds());
-        if (items.size() != variantReqDTO.getFilterItemIds().size()) {
+        List<FilterParameterItem> items = filterParameterItemRepository.findAllById(newVariantReqDTO.getFilterItemIds());
+        if (items.size() != newVariantReqDTO.getFilterItemIds().size()) {
             throw new ItemNotFoundException("Some filter items not found for variant");
         }
 
-        ProductVariant variant = productVariantMapper.toEntity(variantReqDTO);
+        ProductVariant variant = productVariantMapper.toEntity(newVariantReqDTO);
         variant.setProduct(product);
         variant.setItems(items);
 
@@ -56,8 +57,23 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     }
 
     @Override
-    public ApiResponse<?> updateProductVariant(VariantReqDTO variantReqDTO) {
-        return null;
+    public ApiResponse<?> updateProductVariant(UpdateVariantReqDTO dto) {
+        ProductVariant variant = productVariantRepository
+                .findByIdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(dto.getVariantId())
+                .orElseThrow(() -> new ItemNotFoundException("Product variant not found"));
+
+        List<FilterParameterItem> items = filterParameterItemRepository.findAllById(dto.getFilterItemIds());
+        if (items.size() != dto.getFilterItemIds().size()) {
+            throw new ItemNotFoundException("Some filter items not found for variant");
+        }
+
+        variant.setItems(items);
+        variant.setPrice(dto.getPrice());
+        variant.setQuantity(dto.getQuantity());
+        productVariantRepository.save(variant);
+
+        return ApiResponse.success("Product variant updated successfully",
+                Map.of("id", variant.getId()));
     }
 
     @Override
@@ -98,7 +114,6 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
         return ApiResponse.success("Product variants list", variantDTOs);
     }
-
 
     @Override
     public ApiResponse<?> getProductVariantById(Long variantId) {

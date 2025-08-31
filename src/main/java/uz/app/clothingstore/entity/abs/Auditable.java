@@ -39,8 +39,8 @@ public abstract class Auditable implements Serializable {
     private String updatedBy;
 
     @Column(nullable = false)
-    private boolean isDeleted;
+    private boolean isDeleted = false;
 
     @Column(nullable = false)
-    private boolean isActive;
+    private boolean isActive = true;
 }
