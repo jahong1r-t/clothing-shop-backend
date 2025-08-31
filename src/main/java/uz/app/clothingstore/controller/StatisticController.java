@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping("/api/v1/statistic")
 public interface StatisticController {
@@ -12,14 +13,8 @@ public interface StatisticController {
     ResponseEntity<?> getProductStatistic(@PathVariable Long productId);
 
     @GetMapping("/products")
-    ResponseEntity<?> getAllProductStatistics();
+    ResponseEntity<?> getAllProductStatistics(@RequestParam int page, @RequestParam int size);
 
     @GetMapping("/variants/{variantId}")
     ResponseEntity<?> getVariantStatistic(@PathVariable Long variantId);
-
-    @GetMapping("/products/{productId}/variants")
-    ResponseEntity<?> getProductVariantStatistics(@PathVariable Long productId);
-
-    @GetMapping("/variants")
-    ResponseEntity<?> getAllVariantStatistics();
 }

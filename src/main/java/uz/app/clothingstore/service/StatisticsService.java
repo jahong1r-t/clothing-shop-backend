@@ -2,14 +2,11 @@ package uz.app.clothingstore.service;
 
 import uz.app.clothingstore.payload.ApiResponse;
 
-public interface ProductStatsService {
+public interface StatisticsService {
     ApiResponse<?> getProductStatistic(Long productId);
 
-    ApiResponse<?> getAllProductStatistics();
+    ApiResponse<?> getAllProductStatistics(int page, int size);
 
     ApiResponse<?> getVariantStatistic(Long variantId);
 
-    ApiResponse<?> getProductVariantStatistics(Long productId);
-
-    ApiResponse<?> getAllVariantStatistics();
 }
