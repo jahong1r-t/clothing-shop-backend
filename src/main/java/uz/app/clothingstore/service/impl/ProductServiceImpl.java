@@ -14,6 +14,7 @@ import uz.app.clothingstore.mapper.ProductMapper;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.ProductReqDTO;
 import uz.app.clothingstore.payload.req.ProductVariantReqDTO;
+import uz.app.clothingstore.payload.req.UpdateProductReqDTO;
 import uz.app.clothingstore.payload.resp.ProductRespDTO;
 import uz.app.clothingstore.payload.resp.ProductVariantRespDTO;
 import uz.app.clothingstore.repostory.*;
@@ -80,7 +81,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<?> getProducts(int page, int size) {
+    public ApiResponse<?> getAllProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Product> productPage = productRepository.findAllByIsDeletedFalseAndIsActiveTrue(pageable);
 
@@ -139,8 +140,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<?> updateProduct(Long productId, ProductReqDTO productReqDTO) {
-        return null;
+    @Transactional
+    public ApiResponse<?> updateProduct(UpdateProductReqDTO productReqDTO) {
+        Product product = productRepository.findById(productReqDTO.getProductId())
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+
+        Category category = categoryRepository.findById(productReqDTO.getCategoryId())
+                .orElseThrow(() -> new ItemNotFoundException("Category not found"));
+
+        product.setName(productReqDTO.getName());
+        product.setDescription(productReqDTO.getDescription());
+        product.setPrice(productReqDTO.getPrice());
+        product.setQuantity(productReqDTO.getQuantity());
+        product.setCategory(category);
+
+        productRepository.save(product);
+
+        return ApiResponse.success("Product updated successfully", product);
     }
 
     @Override
