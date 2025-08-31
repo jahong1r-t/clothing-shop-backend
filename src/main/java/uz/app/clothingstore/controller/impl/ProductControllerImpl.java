@@ -26,7 +26,7 @@ public class ProductControllerImpl implements ProductController {
 
     @Override
     public ResponseEntity<?> createNewProduct(ProductReqDTO productReqDTO) {
-        ApiResponse<?> apiResponse = productService.createNewProduct(productReqDTO);
+        ApiResponse<?> apiResponse = productService.addProduct(productReqDTO);
         return ResponseEntity.ok(apiResponse);
     }
 

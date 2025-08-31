@@ -36,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ApiResponse<?> createNewProduct(ProductReqDTO productReqDTO) {
+    public ApiResponse<?> addProduct(ProductReqDTO productReqDTO) {
         Product product = productMapper.toEntity(productReqDTO);
 
         Category category = categoryRepository.findById(productReqDTO.getCategoryId())
@@ -80,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<?> getProductList(int page, int size) {
+    public ApiResponse<?> getProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Product> productPage = productRepository.findAllByIsDeletedFalseAndIsActiveTrue(pageable);
 
@@ -96,37 +96,6 @@ public class ProductServiceImpl implements ProductService {
         response.put("totalPages", productPage.getTotalPages());
 
         return ApiResponse.success("Product list", response);
-    }
-
-    @Override
-    public ApiResponse<?> getProductById(Long id) {
-        Product product = productRepository.findByIdAndIsDeletedFalseAndIsActiveTrue(id)
-                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
-
-        ProductRespDTO dto = productMapper.toRespDTO(product);
-
-        if (product.getIsExistVariant()) {
-            List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository
-                    .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId())
-                    .stream()
-                    .map(v -> {
-                        List<Long> list = v.getItems()
-                                .stream()
-                                .map(AbsLongEntity::getId)
-                                .toList();
-
-                        return ProductVariantRespDTO.builder()
-                                .id(v.getId())
-                                .price(v.getPrice())
-                                .quantity(v.getQuantity())
-                                .filterItemIds(list)
-                                .build();
-                    }).toList();
-
-            dto.setVariants(variantRespDTOS);
-        }
-
-        return ApiResponse.success("", dto);
     }
 
     @Override
@@ -170,28 +139,38 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<?> getProductVariantsByProductId(Long productId) {
-        productRepository.findById(productId)
+    public ApiResponse<?> updateProduct(Long productId, ProductReqDTO productReqDTO) {
+        return null;
+    }
+
+    @Override
+    public ApiResponse<?> getProductById(Long id) {
+        Product product = productRepository.findByIdAndIsDeletedFalseAndIsActiveTrue(id)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
-        List<ProductVariantRespDTO> variantDTOs = productVariantRepository
-                .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(productId)
-                .stream()
-                .map(v -> {
-                    List<Long> itemIds = v.getItems()
-                            .stream()
-                            .map(AbsLongEntity::getId)
-                            .toList();
+        ProductRespDTO dto = productMapper.toRespDTO(product);
 
-                    return ProductVariantRespDTO.builder()
-                            .id(v.getId())
-                            .price(v.getPrice())
-                            .quantity(v.getQuantity())
-                            .filterItemIds(itemIds)
-                            .build();
-                })
-                .toList();
+        if (product.getIsExistVariant()) {
+            List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository
+                    .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId())
+                    .stream()
+                    .map(v -> {
+                        List<Long> list = v.getItems()
+                                .stream()
+                                .map(AbsLongEntity::getId)
+                                .toList();
 
-        return ApiResponse.success("Product variants list", variantDTOs);
+                        return ProductVariantRespDTO.builder()
+                                .id(v.getId())
+                                .price(v.getPrice())
+                                .quantity(v.getQuantity())
+                                .filterItemIds(list)
+                                .build();
+                    }).toList();
+
+            dto.setVariants(variantRespDTOS);
+        }
+
+        return ApiResponse.success("", dto);
     }
 }
