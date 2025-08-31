@@ -37,4 +37,10 @@ public abstract class Auditable implements Serializable {
     @JsonIgnore
     @LastModifiedBy
     private String updatedBy;
+
+    @Column(nullable = false)
+    private boolean isDeleted;
+
+    @Column(nullable = false)
+    private boolean isActive;
 }

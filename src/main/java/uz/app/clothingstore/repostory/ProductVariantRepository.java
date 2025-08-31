@@ -8,5 +8,5 @@ import java.util.List;
 
 @RepositoryRestResource(exported = false)
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, Long> {
-    List<ProductVariant> findAllByProduct_Id(Long productId);
+    List<ProductVariant> findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(Long product_id);
 }

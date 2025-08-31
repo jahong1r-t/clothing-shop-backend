@@ -27,6 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
+    private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductVariantRepository productVariantRepository;
@@ -81,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ApiResponse<?> getProductList(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<Product> productPage = productRepository.findAll(pageable);
+        Page<Product> productPage = productRepository.findAllByIsDeletedFalseAndIsActiveTrue(pageable);
 
         List<ProductRespDTO> productDTOs = productPage
                 .stream()
@@ -99,13 +100,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<?> getProductById(Long id) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findByIdAndIsDeletedFalseAndIsActiveTrue(id)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
         ProductRespDTO dto = productMapper.toRespDTO(product);
 
         if (product.getIsExistVariant()) {
-            List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository.findAllByProduct_Id(product.getId())
+            List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository
+                    .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId())
                     .stream()
                     .map(v -> {
                         List<Long> list = v.getItems()
@@ -128,11 +130,52 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResponse<?> getProductVariantsByProductId(Long productId) {
+    @Transactional
+    public ApiResponse<?> deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
-        List<ProductVariantRespDTO> variantDTOs = productVariantRepository.findAllByProduct_Id(productId)
+        List<ProductVariant> variants = productVariantRepository
+                .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId());
+
+        ProductStatistic statistic = productStatisticRepository
+                .findProductStatisticByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId())
+                .orElseThrow(() -> new ItemNotFoundException("Product Statistic not found"));
+
+        List<Review> reviews = reviewRepository
+                .findAllByProduct_IdAndProduct_IsActiveTrueAndIsDeletedFalse(product.getId());
+
+        reviews.forEach(r -> {
+            r.setDeleted(true);
+            r.setActive(false);
+        });
+
+        variants.forEach(v -> {
+            v.setDeleted(true);
+            v.setActive(false);
+        });
+
+        product.setActive(false);
+        product.setDeleted(true);
+
+        statistic.setActive(false);
+        statistic.setDeleted(true);
+
+        productRepository.save(product);
+        reviewRepository.saveAll(reviews);
+        productStatisticRepository.save(statistic);
+        productVariantRepository.saveAll(variants);
+
+        return ApiResponse.success("Product deleted successfully", null);
+    }
+
+    @Override
+    public ApiResponse<?> getProductVariantsByProductId(Long productId) {
+        productRepository.findById(productId)
+                .orElseThrow(() -> new ItemNotFoundException("Product not found"));
+
+        List<ProductVariantRespDTO> variantDTOs = productVariantRepository
+                .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(productId)
                 .stream()
                 .map(v -> {
                     List<Long> itemIds = v.getItems()
@@ -151,5 +194,4 @@ public class ProductServiceImpl implements ProductService {
 
         return ApiResponse.success("Product variants list", variantDTOs);
     }
-
 }

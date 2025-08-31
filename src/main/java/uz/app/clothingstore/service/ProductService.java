@@ -11,4 +11,6 @@ public interface ProductService {
     ApiResponse<?> getProductById(Long id);
 
     ApiResponse<?>getProductVariantsByProductId(Long productId);
+
+    ApiResponse<?> deleteProduct(Long productId);
 }
