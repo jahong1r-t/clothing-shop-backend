@@ -79,8 +79,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<?> getAllProducts(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        Page<Product> productPage = productRepository.findAllByIsDeletedFalseAndIsActiveTrue(pageable);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Product> productPage = productRepository.findAllActive(pageable);
 
         List<ProductRespDTO> productDTOs = productPage
                 .stream()
@@ -99,18 +100,16 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ApiResponse<?> deleteProduct(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findActiveById(productId)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
-        List<ProductVariant> variants = productVariantRepository
-                .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId());
+        List<ProductVariant> variants = productVariantRepository.findAllActiveByProductId(product.getId());
 
-        ProductStatistic statistic = productStatisticRepository
-                .findProductStatisticByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId())
+        ProductStatistic statistic = productStatisticRepository.findActiveById(product.getId())
                 .orElseThrow(() -> new ItemNotFoundException("Product Statistic not found"));
 
         List<Review> reviews = reviewRepository
-                .findAllByProduct_IdAndProduct_IsActiveTrueAndIsDeletedFalse(product.getId());
+                .findAllActiveByProductId(product.getId());
 
         reviews.forEach(r -> {
             r.setDeleted(true);
@@ -139,7 +138,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ApiResponse<?> updateProduct(UpdateProductReqDTO productReqDTO) {
-        Product product = productRepository.findById(productReqDTO.getProductId())
+        Product product = productRepository.findActiveById(productReqDTO.getProductId())
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
         Category category = categoryRepository.findById(productReqDTO.getCategoryId())
@@ -158,14 +157,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ApiResponse<?> getProductById(Long id) {
-        Product product = productRepository.findByIdAndIsDeletedFalseAndIsActiveTrue(id)
+        Product product = productRepository.findActiveById(id)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
         ProductRespDTO dto = productMapper.toRespDTO(product);
 
         if (product.getIsExistVariant()) {
             List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository
-                    .findAllByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(product.getId())
+                    .findAllActiveByProductId(product.getId())
                     .stream()
                     .map(v -> {
                         List<Long> list = v.getItems()

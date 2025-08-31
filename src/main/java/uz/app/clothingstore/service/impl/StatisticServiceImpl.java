@@ -12,26 +12,21 @@ import uz.app.clothingstore.exception.ItemNotFoundException;
 import uz.app.clothingstore.mapper.StatisticMapper;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.resp.StatisticRespDTO;
-import uz.app.clothingstore.repostory.ProductRepository;
 import uz.app.clothingstore.repostory.ProductStatisticRepository;
 import uz.app.clothingstore.repostory.ProductVariantStatsRepository;
 import uz.app.clothingstore.service.StatisticsService;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class StatisticServiceImpl implements StatisticsService {
     private final StatisticMapper statisticMapper;
-    private final ProductRepository productRepository;
     private final ProductStatisticRepository productStatisticRepository;
     private final ProductVariantStatsRepository productVariantStatsRepository;
 
     @Override
     public ApiResponse<?> getProductStatistic(Long productId) {
-        ProductStatistic statistic = productStatisticRepository
-                .findProductStatisticByProduct_IdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(productId)
+        ProductStatistic statistic = productStatisticRepository.findActiveById(productId)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
         StatisticRespDTO dto = statisticMapper.toDTO(statistic);
@@ -45,7 +40,7 @@ public class StatisticServiceImpl implements StatisticsService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<ProductStatistic> statisticsPage = productStatisticRepository
-                .findAllByProduct_IsActiveTrueAndProduct_IsDeletedFalse(pageable);
+                .findAllActiveStatistics(pageable);
 
         Page<StatisticRespDTO> dtoPage = statisticsPage.map(s -> {
             StatisticRespDTO dto = statisticMapper.toDTO(s);
@@ -53,15 +48,12 @@ public class StatisticServiceImpl implements StatisticsService {
             return dto;
         });
 
-
         return ApiResponse.success("All product statistics", dtoPage);
     }
 
-
     @Override
     public ApiResponse<?> getVariantStatistic(Long variantId) {
-        VariantStats stats = productVariantStatsRepository
-                .findByIdAndVariant_IsActiveTrueAndIsDeletedFalse(variantId)
+        VariantStats stats = productVariantStatsRepository.findActiveById(variantId)
                 .orElseThrow(() -> new ItemNotFoundException("Variant not found"));
 
         StatisticRespDTO dto = statisticMapper.toDTO(stats);

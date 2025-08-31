@@ -17,12 +17,6 @@ public class VariantStats extends AbsLongEntity {
     private ProductVariant variant;
 
     @Column(nullable = false)
-    private Float rating = 0.f;
-
-    @Column(nullable = false)
-    private Integer totalReviews = 0;
-
-    @Column(nullable = false)
     private Integer totalSold = 0;
 
     @Column(nullable = false)

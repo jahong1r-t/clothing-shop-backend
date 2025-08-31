@@ -24,11 +24,9 @@ public class StatisticControllerImpl implements StatisticController {
         return ResponseEntity.ok(apiResponse);
     }
 
-
     @Override
     public ResponseEntity<?> getVariantStatistic(Long variantId) {
         ApiResponse<?> apiResponse = statisticsService.getVariantStatistic(variantId);
         return ResponseEntity.ok(apiResponse);
     }
-
 }

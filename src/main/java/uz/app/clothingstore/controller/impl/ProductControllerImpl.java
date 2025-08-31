@@ -40,6 +40,7 @@ public class ProductControllerImpl implements ProductController {
 
     @Override
     public ResponseEntity<?> updateProduct(UpdateProductReqDTO productReqDTO) {
-        return null;
+        ApiResponse<?> apiResponse = productService.updateProduct(productReqDTO);
+        return ResponseEntity.ok(apiResponse);
     }
 }
