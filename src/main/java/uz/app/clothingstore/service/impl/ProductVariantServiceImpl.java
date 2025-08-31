@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uz.app.clothingstore.entity.FilterParameterItem;
 import uz.app.clothingstore.entity.Product;
 import uz.app.clothingstore.entity.ProductVariant;
+import uz.app.clothingstore.entity.VariantStats;
 import uz.app.clothingstore.entity.abs.AbsLongEntity;
 import uz.app.clothingstore.exception.ItemNotFoundException;
 import uz.app.clothingstore.mapper.ProductVariantMapper;
@@ -16,6 +17,7 @@ import uz.app.clothingstore.payload.resp.ProductVariantRespDTO;
 import uz.app.clothingstore.repostory.FilterParameterItemRepository;
 import uz.app.clothingstore.repostory.ProductRepository;
 import uz.app.clothingstore.repostory.ProductVariantRepository;
+import uz.app.clothingstore.repostory.ProductVariantStatsRepository;
 import uz.app.clothingstore.service.ProductVariantService;
 
 import java.util.List;
@@ -28,6 +30,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     private final ProductVariantMapper productVariantMapper;
     private final ProductVariantRepository productVariantRepository;
     private final FilterParameterItemRepository filterParameterItemRepository;
+    private final ProductVariantStatsRepository productVariantStatsRepository;
 
     @Override
     @Transactional
@@ -50,6 +53,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         variant.setItems(items);
 
         productVariantRepository.save(variant);
+        productVariantStatsRepository.save(new VariantStats(variant));
 
         return ApiResponse.success(
                 "Product variant created successfully",
@@ -81,10 +85,17 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         ProductVariant variant = productVariantRepository.findByIdAndProduct_IsActiveTrueAndProduct_IsDeletedFalse(variantId)
                 .orElseThrow(() -> new ItemNotFoundException("Product variant not found"));
 
+        VariantStats stats = productVariantStatsRepository.findByIdAndVariant_IsActiveTrueAndIsDeletedFalse(variantId)
+                .orElseThrow(() -> new ItemNotFoundException("Product variant statistic not found"));
+
+        stats.setDeleted(true);
+        stats.setActive(false);
+
         variant.setActive(false);
         variant.setDeleted(true);
 
         productVariantRepository.save(variant);
+        productVariantStatsRepository.save(stats);
 
         return ApiResponse.success("Product variant deleted successfully", null);
     }

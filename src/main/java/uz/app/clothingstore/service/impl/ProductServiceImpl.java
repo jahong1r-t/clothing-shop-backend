@@ -63,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
                         .items(items)
                         .build();
             }).toList();
+
             productVariantRepository.saveAll(variants);
 
             for (ProductVariant variant : variants) {
