@@ -55,7 +55,6 @@ public class CardServiceImpl implements CartService {
         return ApiResponse.success("Cart retrieved successfully", response);
     }
 
-
     @Override
     public ApiResponse<?> addItemToCart(Long userId, AddCartItemReqDTO dto) {
         Cart cart = cartRepository.findActiveByIdUserId(userId)
