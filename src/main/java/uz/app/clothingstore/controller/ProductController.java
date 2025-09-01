@@ -9,7 +9,7 @@ import uz.app.clothingstore.payload.req.UpdateProductReqDTO;
 @RequestMapping("/api/v1/product")
 public interface ProductController {
     @GetMapping
-    ResponseEntity<?> getAllProducts(@RequestParam int page, @RequestParam int size);
+    ResponseEntity<?> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size);
 
     @GetMapping("/{id}")
     ResponseEntity<?> getProductById(@PathVariable Long id);

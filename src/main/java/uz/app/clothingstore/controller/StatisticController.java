@@ -13,7 +13,8 @@ public interface StatisticController {
     ResponseEntity<?> getProductStatistic(@PathVariable Long productId);
 
     @GetMapping("/products")
-    ResponseEntity<?> getAllProductStatistics(@RequestParam int page, @RequestParam int size);
+    ResponseEntity<?> getAllProductStatistics(@RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size);
 
     @GetMapping("/variants/{variantId}")
     ResponseEntity<?> getVariantStatistic(@PathVariable Long variantId);
