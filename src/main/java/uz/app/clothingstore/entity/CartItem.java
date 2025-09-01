@@ -31,5 +31,4 @@ public class CartItem extends AbsUUIDEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private CartItemStatus status;
-
 }

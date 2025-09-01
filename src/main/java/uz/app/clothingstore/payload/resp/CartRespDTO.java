@@ -11,9 +11,7 @@ import java.util.List;
 @Builder
 public class CartRespDTO {
     private Long cartId;
-    private Long userId;
     private List<CartItemRespDTO> items;
-    private Double totalPrice;
-    private Integer totalQuantity;
 }
+
 
