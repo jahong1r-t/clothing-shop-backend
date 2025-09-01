@@ -24,4 +24,7 @@ public interface ProductStatisticRepository extends JpaRepository<ProductStatist
             "AND ps.isDeleted = false AND ps.product.isActive = true AND ps.product.isDeleted = false")
     Optional<ProductStatistic> findActiveByProductId(@Param("productId") Long productId);
 
+    @Query("SELECT ps FROM ProductStatistic ps WHERE ps.product.isActive = true " +
+            "AND ps.product.isDeleted = false ORDER BY ps.totalSold DESC")
+    Page<ProductStatistic> findTopSoldProducts(Pageable pageable);
 }

@@ -11,8 +11,6 @@ public interface SearchService {
 
     ApiResponse<?> getTopSoldProducts(int page, int size);
 
-    ApiResponse<?> getPopularProducts(int page, int size);
-
     ApiResponse<?> getNewArrivals(int page, int size);
 }
 

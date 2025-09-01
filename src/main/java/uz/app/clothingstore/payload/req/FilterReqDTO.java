@@ -10,8 +10,8 @@ import java.util.List;
 @Setter
 public class FilterReqDTO {
     private Long categoryId;
-    private String minPrice;
-    private String maxPrice;
+    private Double minPrice;
+    private Double maxPrice;
     private List<Long> filterItemIds;
     private ProductSortType sortBy;
 }

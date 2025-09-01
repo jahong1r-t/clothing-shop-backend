@@ -26,12 +26,6 @@ public interface SearchController {
                                          @RequestParam(defaultValue = "10") int size
     );
 
-
-    @GetMapping("/products/popular")
-    ResponseEntity<?> getPopularProducts(@RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size
-    );
-
     @GetMapping("/products/new-arrivals")
     ResponseEntity<?> getNewArrivals(@RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "10") int size
