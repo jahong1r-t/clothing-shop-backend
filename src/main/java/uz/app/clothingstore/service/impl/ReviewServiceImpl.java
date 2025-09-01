@@ -54,6 +54,7 @@ public class ReviewServiceImpl implements ReviewService {
         float newRating = ((statistic.getRating() * totalReviews) + dto.getRating()) / (totalReviews + 1);
 
         statistic.setRating(newRating);
+        statistic.setTotalReviews(totalReviews + 1);
         productStatisticRepository.save(statistic);
 
         return ApiResponse.success(
@@ -129,7 +130,6 @@ public class ReviewServiceImpl implements ReviewService {
         float newRating = ((statistic.getRating() * totalReviews) + dto.getRating()) / (totalReviews + 1);
 
         statistic.setRating(newRating);
-        statistic.setTotalReviews(totalReviews + 1);
 
         productStatisticRepository.save(statistic);
 

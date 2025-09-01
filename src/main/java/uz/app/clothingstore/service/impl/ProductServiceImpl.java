@@ -173,12 +173,14 @@ public class ProductServiceImpl implements ProductService {
 
                         return ProductVariantRespDTO.builder()
                                 .id(v.getId())
+                                .productId(product.getId())
                                 .price(v.getPrice())
                                 .quantity(v.getQuantity())
                                 .filterItemIds(list)
                                 .build();
                     }).toList();
 
+            dto.setCategoryId(product.getCategory().getId());
             dto.setVariants(variantRespDTOS);
         }
 
