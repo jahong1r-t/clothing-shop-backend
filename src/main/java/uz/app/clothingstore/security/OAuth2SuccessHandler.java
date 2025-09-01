@@ -10,10 +10,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import uz.app.clothingstore.entity.Cart;
 import uz.app.clothingstore.entity.User;
 import uz.app.clothingstore.entity.enums.Provider;
 import uz.app.clothingstore.entity.enums.Role;
 import uz.app.clothingstore.payload.ApiResponse;
+import uz.app.clothingstore.repostory.CartRepository;
 import uz.app.clothingstore.repostory.UserRepository;
 import uz.app.clothingstore.service.impl.CacheService;
 
@@ -25,6 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
+    private final CartRepository cartRepository;
     private final CacheService cacheService;
     private final JwtService jwtService;
 
@@ -40,17 +43,21 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String lastName = oAuth2User.getAttribute("family_name");
 
         User user = userRepository.findByEmail(email)
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .email(email)
-                                .role(Role.USER)
-                                .provider(Provider.GOOGLE)
-                                .isVerified(true)
-                                .isEnabled(true)
-                                .build()
-                ));
+                .orElseGet(() -> {
+                    User build = User.builder()
+                            .firstName(firstName)
+                            .lastName(lastName)
+                            .email(email)
+                            .role(Role.USER)
+                            .provider(Provider.GOOGLE)
+                            .isVerified(true)
+                            .build();
+
+                    build.setDeleted(false);
+                    build.setActive(true);
+                    cartRepository.save(new Cart(build));
+                    return userRepository.save(build);
+                });
 
         String accessToken = jwtService.generateJwtAccessToken(user);
         String refreshToken = jwtService.generateJwtRefreshToken(user);

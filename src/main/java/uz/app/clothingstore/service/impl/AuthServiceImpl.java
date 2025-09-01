@@ -1,6 +1,7 @@
 package uz.app.clothingstore.service.impl;
 
 import io.jsonwebtoken.JwtException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import uz.app.clothingstore.entity.Cart;
 import uz.app.clothingstore.entity.User;
 import uz.app.clothingstore.exception.ConfirmCodeExpiredException;
 import uz.app.clothingstore.exception.EmailAlreadyExistsException;
@@ -22,6 +24,7 @@ import uz.app.clothingstore.payload.req.ConfirmEmailReqDTO;
 import uz.app.clothingstore.payload.req.ResendCodeReqDTO;
 import uz.app.clothingstore.payload.req.SignInReqDTO;
 import uz.app.clothingstore.payload.req.SignUpReqDTO;
+import uz.app.clothingstore.repostory.CartRepository;
 import uz.app.clothingstore.repostory.UserRepository;
 import uz.app.clothingstore.security.JwtService;
 import uz.app.clothingstore.service.AuthService;
@@ -37,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
+    private final CartRepository cartRepository;
     private final CacheService cacheService;
     private final JwtService jwtService;
     private final UserMapper userMapper;
@@ -93,6 +97,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<?> confirmEmail(ConfirmEmailReqDTO confirmEmailReqDTO) {
         User user = Optional.ofNullable(cacheService.getUserFromCache(confirmEmailReqDTO.getEmail()))
                 .orElseThrow(() -> new SignUpSessionExpiredException("Sign-up session expired. Please sign up again."));
@@ -104,9 +109,12 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidConfirmCodeException("Invalid confirmation code");
         }
 
-        user.setIsEnabled(true);
+        user.setActive(true);
+        user.setDeleted(false);
         user.setIsVerified(true);
         userRepository.save(user);
+
+        cartRepository.save(new Cart(user));
 
         cacheService.removeUserFromCache(user.getEmail());
         cacheService.removeConfirmCodeFromCache(user.getEmail());

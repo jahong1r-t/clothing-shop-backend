@@ -42,8 +42,6 @@ public class User extends AbsLongEntity implements UserDetails, Serializable {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
-    private Boolean isEnabled;
-
     private Boolean isVerified;
 
     @Override
@@ -66,7 +64,7 @@ public class User extends AbsLongEntity implements UserDetails, Serializable {
     @Override
     @JsonIgnore
     public boolean isEnabled() {
-        return Boolean.TRUE.equals(this.isEnabled);
+        return this.isActive();
     }
 
     @Override
