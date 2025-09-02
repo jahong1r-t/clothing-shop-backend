@@ -23,12 +23,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     @Query("SELECT DISTINCT p FROM Product p JOIN ProductVariant v ON v.product =p JOIN v. items i WHERE p.category.id =:categoryId " +
-            "AND p.isActive=true AND p.isDeleted=false AND p. price BETWEEN : minPrice AND :maxPrice AND i. id IN :filterItemIds ORDER BY ")
+            "AND p.isActive=true AND p.isDeleted=false AND p. price BETWEEN : minPrice AND :maxPrice AND i. id IN :filterItemIds")
     Page<Product> getProductsByFilter(@Param("categoryId") Long categoryId,
                                       @Param("minPrice") Double minPrice,
                                       @Param("maxPrice") Double maxPrice,
                                       @Param("filterItemIds") List<Long> filterItemIds,
-                                      @Param("")
                                       Pageable pageable);
 
     Page<Product> findByIsActiveTrueAndIsDeletedFalse(Pageable pageable);

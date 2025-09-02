@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @RepositoryRestResource(exported = false)
 public interface CartRepository extends JpaRepository<Cart, Long> {
-    @Query("SELECT c from Cart c where c.user.id=:id AND c.isActive == true AND c.isDeleted = true")
+    @Query("SELECT c from Cart c where c.user.id=:id AND c.isActive = true AND c.isDeleted = true")
     Optional<Cart> findActiveByIdUserId(@Param("id") Long id);
 
 }
