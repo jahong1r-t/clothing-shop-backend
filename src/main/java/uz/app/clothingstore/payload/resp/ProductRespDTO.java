@@ -18,5 +18,4 @@ public class ProductRespDTO {
     private Boolean isExistVariant;
     private Long categoryId;
     private List<ProductVariantRespDTO> variants;
-    private String imageUrl;
 }

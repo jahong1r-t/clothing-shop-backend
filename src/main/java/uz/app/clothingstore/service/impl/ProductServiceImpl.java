@@ -15,9 +15,11 @@ import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.ProductReqDTO;
 import uz.app.clothingstore.payload.req.ProductVariantReqDTO;
 import uz.app.clothingstore.payload.req.UpdateProductReqDTO;
+import uz.app.clothingstore.payload.resp.ProductImgRespDTO;
 import uz.app.clothingstore.payload.resp.ProductRespDTO;
 import uz.app.clothingstore.payload.resp.ProductVariantRespDTO;
 import uz.app.clothingstore.repostory.*;
+import uz.app.clothingstore.service.AttachmentService;
 import uz.app.clothingstore.service.ProductService;
 
 import java.util.HashMap;
@@ -30,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
+    private final AttachmentService attachmentService;
     private final CategoryRepository categoryRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductStatisticRepository productStatisticRepository;
@@ -183,6 +186,7 @@ public class ProductServiceImpl implements ProductService {
             dto.setCategoryId(product.getCategory().getId());
             dto.setVariants(variantRespDTOS);
         }
+
 
         return ApiResponse.success("", dto);
     }

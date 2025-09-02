@@ -8,13 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uz.app.clothingstore.entity.Product;
-import uz.app.clothingstore.entity.ProductImage;
 import uz.app.clothingstore.entity.ProductStatistic;
-import uz.app.clothingstore.exception.ItemNotFoundException;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.FilterReqDTO;
 import uz.app.clothingstore.payload.resp.ProductRespDTO;
-import uz.app.clothingstore.repostory.ProductImagesRepository;
 import uz.app.clothingstore.repostory.ProductRepository;
 import uz.app.clothingstore.repostory.ProductStatisticRepository;
 import uz.app.clothingstore.service.SearchService;
@@ -25,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
     private final ProductRepository productRepository;
-    private final ProductImagesRepository productImagesRepository;
     private final ProductStatisticRepository productStatisticRepository;
 
     @Override
@@ -33,22 +29,16 @@ public class SearchServiceImpl implements SearchService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Product> products = productRepository.searchByName(query, pageable);
-        List<ProductRespDTO> dto = products.stream().map(p -> {
-            ProductImage img = productImagesRepository.findProductImageByProduct_IdAndIsMainTrue(p.getId())
-                    .orElseThrow(() -> new ItemNotFoundException("Product img not found"));
-
-            return ProductRespDTO.builder()
-                    .id(p.getId())
-                    .name(p.getName())
-                    .price(p.getPrice())
-                    .quantity(p.getQuantity())
-                    .categoryId(p.getCategory().getId())
-                    .description(p.getDescription())
-                    .isExistVariant(p.getIsExistVariant())
-                    .imageUrl(img.getS3key())
-                    .build();
-        }).toList();
-
+        List<ProductRespDTO> dto = products.stream().map(p ->
+                ProductRespDTO.builder()
+                        .id(p.getId())
+                        .name(p.getName())
+                        .price(p.getPrice())
+                        .quantity(p.getQuantity())
+                        .categoryId(p.getCategory().getId())
+                        .description(p.getDescription())
+                        .isExistVariant(p.getIsExistVariant())
+                        .build()).toList();
         return ApiResponse.success("Product", dto);
     }
 
@@ -68,21 +58,15 @@ public class SearchServiceImpl implements SearchService {
                 dto.getCategoryId(), dto.getMinPrice(), dto.getMaxPrice(), dto.getFilterItemIds(), pageable
         );
 
-        List<ProductRespDTO> products = productsByFilter.stream().map(p -> {
-            ProductImage img = productImagesRepository.findProductImageByProduct_IdAndIsMainTrue(p.getId())
-                    .orElseThrow(() -> new ItemNotFoundException("Product img not found"));
-
-            return ProductRespDTO.builder()
-                    .id(p.getId())
-                    .name(p.getName())
-                    .price(p.getPrice())
-                    .quantity(p.getQuantity())
-                    .categoryId(p.getCategory().getId())
-                    .description(p.getDescription())
-                    .isExistVariant(p.getIsExistVariant())
-                    .imageUrl(img.getS3key())
-                    .build();
-        }).toList();
+        List<ProductRespDTO> products = productsByFilter.stream().map(p -> ProductRespDTO.builder()
+                .id(p.getId())
+                .name(p.getName())
+                .price(p.getPrice())
+                .quantity(p.getQuantity())
+                .categoryId(p.getCategory().getId())
+                .description(p.getDescription())
+                .isExistVariant(p.getIsExistVariant())
+                .build()).toList();
 
         return ApiResponse.success("Product list", products);
     }
@@ -94,22 +78,16 @@ public class SearchServiceImpl implements SearchService {
 
         Page<ProductStatistic> topSoldProducts = productStatisticRepository.findTopSoldProducts(pageable);
 
-        List<ProductRespDTO> dto = topSoldProducts.stream().map(ps -> {
-            ProductImage img = productImagesRepository.findProductImageByProduct_IdAndIsMainTrue(ps.getProduct().getId())
-                    .orElseThrow(() -> new ItemNotFoundException("Product img not found"));
-
-            return ProductRespDTO.builder()
-                    .id(ps.getProduct().getId())
-                    .name(ps.getProduct().getName())
-                    .price(ps.getProduct().getPrice())
-                    .quantity(ps.getProduct().getQuantity())
-                    .categoryId(ps.getProduct().getCategory().getId())
-                    .description(ps.getProduct().getDescription())
-                    .isExistVariant(ps.getProduct().getIsExistVariant())
-                    .imageUrl(img.getS3key())
-                    .build();
-        }).toList();
-
+        List<ProductRespDTO> dto = topSoldProducts.stream().map(ps ->
+                ProductRespDTO.builder()
+                        .id(ps.getProduct().getId())
+                        .name(ps.getProduct().getName())
+                        .price(ps.getProduct().getPrice())
+                        .quantity(ps.getProduct().getQuantity())
+                        .categoryId(ps.getProduct().getCategory().getId())
+                        .description(ps.getProduct().getDescription())
+                        .isExistVariant(ps.getProduct().getIsExistVariant())
+                        .build()).toList();
         return ApiResponse.success("Top sold products", dto);
     }
 
