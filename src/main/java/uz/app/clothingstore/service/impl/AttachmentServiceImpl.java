@@ -37,14 +37,14 @@ public class AttachmentServiceImpl implements AttachmentService {
     private final ProductImageRepository productImagesRepository;
 
     @Override
-    public ApiResponse<?> upload(AttachmentReqDTO dto) {
-        Product product = productRepository.findActiveById(dto.getProductId())
+    public ApiResponse<?> upload(Long productId, Integer mainFileIndex, List<MultipartFile> files) {
+        Product product = productRepository.findActiveById(productId)
                 .orElseThrow(() -> new ItemNotFoundException("Product not found"));
 
         List<ProductImage> list = new ArrayList<>();
 
-        for (int i = 0; i < dto.getFiles().size(); i++) {
-            MultipartFile f = dto.getFiles().get(i);
+        for (int i = 0; i < files.size(); i++) {
+            MultipartFile f = files.get(i);
             String fileId = UUID.randomUUID().toString();
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -59,7 +59,7 @@ public class AttachmentServiceImpl implements AttachmentService {
                 throw new RuntimeException(e);
             }
 
-            boolean isMain = dto.getMainFileIndex() != null && dto.getMainFileIndex() == i;
+            boolean isMain = mainFileIndex != null && mainFileIndex == i;
 
             ProductImage image = ProductImage.builder()
                     .s3key(fileId)
