@@ -15,9 +15,9 @@ import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.ProductReqDTO;
 import uz.app.clothingstore.payload.req.ProductVariantReqDTO;
 import uz.app.clothingstore.payload.req.UpdateProductReqDTO;
-import uz.app.clothingstore.payload.resp.ProductImgRespDTO;
 import uz.app.clothingstore.payload.resp.ProductRespDTO;
 import uz.app.clothingstore.payload.resp.ProductVariantRespDTO;
+import uz.app.clothingstore.payload.resp.PromotionRespDTO;
 import uz.app.clothingstore.repostory.*;
 import uz.app.clothingstore.service.AttachmentService;
 import uz.app.clothingstore.service.ProductService;
@@ -38,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductStatisticRepository productStatisticRepository;
     private final FilterParameterItemRepository filterParameterItemRepository;
     private final ProductVariantStatsRepository productVariantStatsRepository;
+    private final PromotionRepository promotionRepository;
 
     @Override
     @Transactional
@@ -88,7 +89,25 @@ public class ProductServiceImpl implements ProductService {
 
         List<ProductRespDTO> productDTOs = productPage
                 .stream()
-                .map(productMapper::toRespDTO)
+                .map(p -> {
+                    ProductRespDTO respDTO = productMapper.toRespDTO(p);
+
+                    if (p.getIsExistVariant()) {
+                        Promotion promotion = promotionRepository.findPromotionByProduct_Id(p.getId())
+                                .orElseThrow(() -> new ItemNotFoundException("Promotion not found"));
+
+                        respDTO.setPromotion(
+                                PromotionRespDTO.builder()
+                                        .endDate(promotion.getEndDate())
+                                        .startDate(promotion.getStartDate())
+                                        .discountPercent(promotion.getDiscountPercent())
+                                        .productId(p.getId())
+                                        .active(promotion.isActive())
+                                        .build());
+                    }
+                    return respDTO;
+
+                })
                 .toList();
 
         Map<String, Object> response = new HashMap<>();
@@ -165,7 +184,7 @@ public class ProductServiceImpl implements ProductService {
 
         ProductRespDTO dto = productMapper.toRespDTO(product);
 
-        if (product.getIsExistVariant()) {
+        if (Boolean.TRUE.equals(product.getIsExistVariant())) {
             List<ProductVariantRespDTO> variantRespDTOS = productVariantRepository.findAllActiveByProductId(product.getId())
                     .stream()
                     .map(v -> {
@@ -187,7 +206,23 @@ public class ProductServiceImpl implements ProductService {
             dto.setVariants(variantRespDTOS);
         }
 
+        if (Boolean.TRUE.equals(product.getIsExistPromotion())) {
+            Promotion promotion = promotionRepository.findPromotionByProduct_Id(product.getId())
+                    .orElseThrow(() -> new ItemNotFoundException("Promotion not found"));
 
-        return ApiResponse.success("", dto);
+            dto.setPromotion(
+                    PromotionRespDTO.builder()
+                            .endDate(promotion.getEndDate())
+                            .startDate(promotion.getStartDate())
+                            .discountPercent(promotion.getDiscountPercent())
+                            .productId(product.getId())
+                            .active(promotion.isActive())
+                            .build()
+            );
+        }
+
+        return ApiResponse.success("Product fetched successfully", dto);
     }
+
+
 }

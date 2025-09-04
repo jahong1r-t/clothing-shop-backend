@@ -17,5 +17,6 @@ public class ProductRespDTO {
     private Integer quantity;
     private Boolean isExistVariant;
     private Long categoryId;
+    private PromotionRespDTO promotion;
     private List<ProductVariantRespDTO> variants;
 }

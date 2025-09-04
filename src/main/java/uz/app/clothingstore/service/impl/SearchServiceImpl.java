@@ -12,8 +12,10 @@ import uz.app.clothingstore.entity.ProductStatistic;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.FilterReqDTO;
 import uz.app.clothingstore.payload.resp.ProductRespDTO;
+import uz.app.clothingstore.payload.resp.PromotionRespDTO;
 import uz.app.clothingstore.repostory.ProductRepository;
 import uz.app.clothingstore.repostory.ProductStatisticRepository;
+import uz.app.clothingstore.repostory.PromotionRepository;
 import uz.app.clothingstore.service.SearchService;
 
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
     private final ProductRepository productRepository;
+    private final PromotionRepository promotionRepository;
     private final ProductStatisticRepository productStatisticRepository;
 
     @Override
@@ -29,16 +32,34 @@ public class SearchServiceImpl implements SearchService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Product> products = productRepository.searchByName(query, pageable);
-        List<ProductRespDTO> dto = products.stream().map(p ->
-                ProductRespDTO.builder()
-                        .id(p.getId())
-                        .name(p.getName())
-                        .price(p.getPrice())
-                        .quantity(p.getQuantity())
-                        .categoryId(p.getCategory().getId())
-                        .description(p.getDescription())
-                        .isExistVariant(p.getIsExistVariant())
-                        .build()).toList();
+        List<ProductRespDTO> dto = products.stream().map(p -> {
+            ProductRespDTO respDTO = ProductRespDTO.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .price(p.getPrice())
+                    .quantity(p.getQuantity())
+                    .categoryId(p.getCategory().getId())
+                    .description(p.getDescription())
+                    .isExistVariant(p.getIsExistVariant())
+                    .build();
+
+            if (Boolean.TRUE.equals(p.getIsExistPromotion())) {
+                promotionRepository.findPromotionByProduct_Id(p.getId()).ifPresent(promotion ->
+                        respDTO.setPromotion(
+                                PromotionRespDTO.builder()
+                                        .endDate(promotion.getEndDate())
+                                        .startDate(promotion.getStartDate())
+                                        .discountPercent(promotion.getDiscountPercent())
+                                        .productId(p.getId())
+                                        .active(promotion.isActive())
+                                        .build()
+                        )
+                );
+            }
+
+            return respDTO;
+        }).toList();
+
         return ApiResponse.success("Product", dto);
     }
 
@@ -58,15 +79,33 @@ public class SearchServiceImpl implements SearchService {
                 dto.getCategoryId(), dto.getMinPrice(), dto.getMaxPrice(), dto.getFilterItemIds(), pageable
         );
 
-        List<ProductRespDTO> products = productsByFilter.stream().map(p -> ProductRespDTO.builder()
-                .id(p.getId())
-                .name(p.getName())
-                .price(p.getPrice())
-                .quantity(p.getQuantity())
-                .categoryId(p.getCategory().getId())
-                .description(p.getDescription())
-                .isExistVariant(p.getIsExistVariant())
-                .build()).toList();
+        List<ProductRespDTO> products = productsByFilter.stream().map(p -> {
+            ProductRespDTO respDTO = ProductRespDTO.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .price(p.getPrice())
+                    .quantity(p.getQuantity())
+                    .categoryId(p.getCategory().getId())
+                    .description(p.getDescription())
+                    .isExistVariant(p.getIsExistVariant())
+                    .build();
+
+            if (Boolean.TRUE.equals(p.getIsExistPromotion())) {
+                promotionRepository.findPromotionByProduct_Id(p.getId()).ifPresent(promotion ->
+                        respDTO.setPromotion(
+                                PromotionRespDTO.builder()
+                                        .endDate(promotion.getEndDate())
+                                        .startDate(promotion.getStartDate())
+                                        .discountPercent(promotion.getDiscountPercent())
+                                        .productId(p.getId())
+                                        .active(promotion.isActive())
+                                        .build()
+                        )
+                );
+            }
+
+            return respDTO;
+        }).toList();
 
         return ApiResponse.success("Product list", products);
     }
@@ -78,16 +117,36 @@ public class SearchServiceImpl implements SearchService {
 
         Page<ProductStatistic> topSoldProducts = productStatisticRepository.findTopSoldProducts(pageable);
 
-        List<ProductRespDTO> dto = topSoldProducts.stream().map(ps ->
-                ProductRespDTO.builder()
-                        .id(ps.getProduct().getId())
-                        .name(ps.getProduct().getName())
-                        .price(ps.getProduct().getPrice())
-                        .quantity(ps.getProduct().getQuantity())
-                        .categoryId(ps.getProduct().getCategory().getId())
-                        .description(ps.getProduct().getDescription())
-                        .isExistVariant(ps.getProduct().getIsExistVariant())
-                        .build()).toList();
+        List<ProductRespDTO> dto = topSoldProducts.stream().map(ps -> {
+            Product p = ps.getProduct();
+
+            ProductRespDTO respDTO = ProductRespDTO.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .price(p.getPrice())
+                    .quantity(p.getQuantity())
+                    .categoryId(p.getCategory().getId())
+                    .description(p.getDescription())
+                    .isExistVariant(p.getIsExistVariant())
+                    .build();
+
+            if (Boolean.TRUE.equals(p.getIsExistPromotion())) {
+                promotionRepository.findPromotionByProduct_Id(p.getId()).ifPresent(promotion ->
+                        respDTO.setPromotion(
+                                PromotionRespDTO.builder()
+                                        .endDate(promotion.getEndDate())
+                                        .startDate(promotion.getStartDate())
+                                        .discountPercent(promotion.getDiscountPercent())
+                                        .productId(p.getId())
+                                        .active(promotion.isActive())
+                                        .build()
+                        )
+                );
+            }
+
+            return respDTO;
+        }).toList();
+
         return ApiResponse.success("Top sold products", dto);
     }
 
@@ -98,6 +157,34 @@ public class SearchServiceImpl implements SearchService {
 
         Page<Product> products = productRepository.findByIsActiveTrueAndIsDeletedFalse(pageable);
 
-        return ApiResponse.success("New arrivals", products);
+        List<ProductRespDTO> dto = products.stream().map(p -> {
+            ProductRespDTO respDTO = ProductRespDTO.builder()
+                    .id(p.getId())
+                    .name(p.getName())
+                    .price(p.getPrice())
+                    .quantity(p.getQuantity())
+                    .categoryId(p.getCategory().getId())
+                    .description(p.getDescription())
+                    .isExistVariant(p.getIsExistVariant())
+                    .build();
+
+            if (Boolean.TRUE.equals(p.getIsExistPromotion())) {
+                promotionRepository.findPromotionByProduct_Id(p.getId()).ifPresent(promotion ->
+                        respDTO.setPromotion(
+                                PromotionRespDTO.builder()
+                                        .endDate(promotion.getEndDate())
+                                        .startDate(promotion.getStartDate())
+                                        .discountPercent(promotion.getDiscountPercent())
+                                        .productId(p.getId())
+                                        .active(promotion.isActive())
+                                        .build()
+                        )
+                );
+            }
+
+            return respDTO;
+        }).toList();
+
+        return ApiResponse.success("New arrivals", dto);
     }
 }

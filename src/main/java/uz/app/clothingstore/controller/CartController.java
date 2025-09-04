@@ -34,8 +34,5 @@ public interface CartController {
 
     @GetMapping("/count")
     ResponseEntity<?> getCartItemCount(@AuthenticationPrincipal User user);
-
-    @GetMapping("/total")
-    ResponseEntity<?> getCartTotalPrice(@AuthenticationPrincipal User user);
 }
 

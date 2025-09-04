@@ -25,32 +25,32 @@ public class CartControllerImpl implements CartController {
 
     @Override
     public ResponseEntity<?> addCartItem(User user, AddCartItemReqDTO request) {
-        ApiResponse<?> apiResponse = cartService.addItemToCart(user.getId(), request);
-        return ResponseEntity.ok(apiResponse);
+        ApiResponse<?> response = cartService.addItemToCart(user.getId(), request);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<?> updateCartItem(User user, UUID itemId, UpdateCartItemRequest request) {
-        return null;
+        ApiResponse<?> response = cartService.updateCartItem(user.getId(), itemId, request);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<?> removeCartItem(User user, UUID itemId) {
-        return null;
+        ApiResponse<?> response = cartService.removeCartItem(user.getId(), itemId);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<?> clearCart(User user) {
-        return null;
+        ApiResponse<?> response = cartService.clearCart(user.getId());
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<?> getCartItemCount(User user) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<?> getCartTotalPrice(User user) {
-        return null;
+        ApiResponse<?> response = cartService.getCartItemCount(user.getId());
+        return ResponseEntity.ok(response);
     }
 }
+

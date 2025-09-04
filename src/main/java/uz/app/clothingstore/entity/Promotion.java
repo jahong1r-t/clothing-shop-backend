@@ -5,6 +5,7 @@ import lombok.*;
 import uz.app.clothingstore.entity.abs.AbsLongEntity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -20,6 +21,8 @@ public class Promotion extends AbsLongEntity {
     private Product product;
 
     private Double oldPrice;
+
+    private Double newPrice;
 
     private Double discountPercent;
 

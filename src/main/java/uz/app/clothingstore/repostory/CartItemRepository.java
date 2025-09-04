@@ -22,4 +22,10 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
             "AND i.isDeleted = false AND i.cart.isActive = true AND i.cart.isDeleted = false")
     List<CartItem> getAllActiveByCartId(@Param("cartId") Long cartId);
 
+
+    Integer countByCart_UserId(Long userId);
+
+    void deleteAllByCartId(Long id);
+
+    Optional<CartItem> findByIdAndCart_UserId(UUID itemId, Long userId);
 }

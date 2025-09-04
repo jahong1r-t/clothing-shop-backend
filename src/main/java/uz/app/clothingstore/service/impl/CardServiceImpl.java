@@ -10,6 +10,7 @@ import uz.app.clothingstore.entity.enums.CartItemStatus;
 import uz.app.clothingstore.exception.ItemNotFoundException;
 import uz.app.clothingstore.payload.ApiResponse;
 import uz.app.clothingstore.payload.req.AddCartItemReqDTO;
+import uz.app.clothingstore.payload.req.UpdateCartItemRequest;
 import uz.app.clothingstore.payload.resp.CartItemRespDTO;
 import uz.app.clothingstore.payload.resp.CartRespDTO;
 import uz.app.clothingstore.repostory.CartItemRepository;
@@ -18,8 +19,10 @@ import uz.app.clothingstore.repostory.ProductRepository;
 import uz.app.clothingstore.repostory.ProductVariantRepository;
 import uz.app.clothingstore.service.CartService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -81,4 +84,42 @@ public class CardServiceImpl implements CartService {
         return ApiResponse.success("Item added successfully",
                 Map.of("itemId", cartItem.getId()));
     }
+
+    @Override
+    public ApiResponse<?> updateCartItem(Long userId, UUID itemId, UpdateCartItemRequest dto) {
+        CartItem item = cartItemRepository.findByIdAndCart_UserId(itemId, userId)
+                .orElseThrow(() -> new ItemNotFoundException("Cart item not found"));
+
+        item.setQuantity(dto.getQuantity());
+        cartItemRepository.save(item);
+
+        return ApiResponse.success("Cart item updated", Map.of("itemId", item.getId()));
+    }
+
+    @Override
+    public ApiResponse<?> removeCartItem(Long userId, UUID itemId) {
+        CartItem item = cartItemRepository.findByIdAndCart_UserId(itemId, userId)
+                .orElseThrow(() -> new ItemNotFoundException("Cart item not found"));
+
+        cartItemRepository.delete(item);
+
+        return ApiResponse.success("Cart item removed", null);
+    }
+
+    @Override
+    public ApiResponse<?> clearCart(Long userId) {
+        Cart cart = cartRepository.findActiveByIdUserId(userId)
+                .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
+
+        cartItemRepository.deleteAllByCartId(cart.getId());
+
+        return ApiResponse.success("Cart cleared", null);
+    }
+
+    @Override
+    public ApiResponse<?> getCartItemCount(Long userId) {
+        Integer count = cartItemRepository.countByCart_UserId(userId);
+        return ApiResponse.success("Cart item count", Map.of("count", count));
+    }
+
 }

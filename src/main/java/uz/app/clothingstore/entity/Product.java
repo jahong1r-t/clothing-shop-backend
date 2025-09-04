@@ -29,6 +29,9 @@ public class Product extends AbsLongEntity {
     private Integer quantity;
 
     @Column(nullable = false)
+    private Boolean isExistPromotion;
+
+    @Column(nullable = false)
     private Boolean isExistVariant;
 
     @ManyToOne(fetch = FetchType.LAZY)
