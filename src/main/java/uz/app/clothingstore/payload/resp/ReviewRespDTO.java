@@ -1,8 +1,6 @@
 package uz.app.clothingstore.payload.resp;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,6 +8,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReviewRespDTO {
     private UUID id;
     private Long productId;

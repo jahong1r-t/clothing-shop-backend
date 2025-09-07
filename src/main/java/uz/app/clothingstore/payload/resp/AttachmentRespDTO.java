@@ -1,10 +1,12 @@
 package uz.app.clothingstore.payload.resp;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class AttachmentRespDTO {
     private String s3Key;
     private String originalFileName;

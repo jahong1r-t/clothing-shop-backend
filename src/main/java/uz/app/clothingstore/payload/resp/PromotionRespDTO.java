@@ -1,15 +1,15 @@
 package uz.app.clothingstore.payload.resp;
 
 import jakarta.persistence.Column;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PromotionRespDTO {
     private Long productId;
 

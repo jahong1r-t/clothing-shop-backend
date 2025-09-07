@@ -8,12 +8,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@MappedSuperclass
-@EqualsAndHashCode(callSuper = true)
-public abstract class AbsLongEntity extends Auditable  {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-}
+    @Getter
+    @Setter
+    @MappedSuperclass
+    @EqualsAndHashCode(callSuper = true)
+    public abstract class AbsLongEntity extends Auditable  {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+    }

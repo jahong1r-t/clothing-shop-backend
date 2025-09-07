@@ -21,6 +21,7 @@ public class SearchControllerImpl implements SearchController {
 
     @Override
     public ResponseEntity<?> filterProducts(FilterReqDTO filterReqDTO, int page, int size) {
+        filterReqDTO.dto();
         ApiResponse<?> apiResponse = searchService.filterProducts(filterReqDTO, page, size);
         return ResponseEntity.ok(apiResponse);
     }

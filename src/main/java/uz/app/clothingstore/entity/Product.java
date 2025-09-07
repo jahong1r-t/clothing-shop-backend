@@ -37,5 +37,3 @@ public class Product extends AbsLongEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 }
-
-

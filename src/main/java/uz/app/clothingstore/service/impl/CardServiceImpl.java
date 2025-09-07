@@ -19,10 +19,10 @@ import uz.app.clothingstore.repostory.ProductRepository;
 import uz.app.clothingstore.repostory.ProductVariantRepository;
 import uz.app.clothingstore.service.CartService;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,15 +39,23 @@ public class CardServiceImpl implements CartService {
 
         List<CartItem> cartItems = cartItemRepository.getAllActiveByCartId(cart.getId());
 
-        List<CartItemRespDTO> items = cartItems.stream()
-                .map(i -> CartItemRespDTO.builder()
-                        .itemId(i.getId())
-                        .productId(i.getProduct().getId())
-                        .productName(i.getProduct().getName())
-                        .variantId(i.getVariant() != null ? i.getVariant().getId() : null)
-                        .quantity(i.getQuantity())
-                        .build()
-                )
+        Map<String, List<CartItem>> grouped = cartItems.stream()
+                .collect(Collectors.groupingBy(i ->
+                        i.getProduct().getId() + "-" + (i.getVariant() != null ? i.getVariant().getId() : "null")
+                ));
+
+        List<CartItemRespDTO> items = grouped.values().stream()
+                .map(list -> {
+                    CartItem first = list.get(0);
+                    int totalQty = list.stream().mapToInt(CartItem::getQuantity).sum();
+                    return CartItemRespDTO.builder()
+                            .itemId(first.getId())
+                            .productId(first.getProduct().getId())
+                            .productName(first.getProduct().getName())
+                            .variantId(first.getVariant() != null ? first.getVariant().getId() : null)
+                            .quantity(totalQty)
+                            .build();
+                })
                 .toList();
 
         CartRespDTO response = CartRespDTO.builder()
@@ -63,26 +71,49 @@ public class CardServiceImpl implements CartService {
         Cart cart = cartRepository.findActiveByIdUserId(userId)
                 .orElseThrow(() -> new ItemNotFoundException("Cart not found"));
 
-        CartItem cartItem = new CartItem();
-        cartItem.setCart(cart);
-        cartItem.setStatus(CartItemStatus.ACTIVE);
-        cartItem.setQuantity(dto.getQuantity());
+        Product product;
+        ProductVariant variant = null;
 
         if (dto.getVariantId() != null) {
-            ProductVariant variant = variantRepository.findActiveById(dto.getVariantId())
+            variant = variantRepository.findActiveById(dto.getVariantId())
                     .orElseThrow(() -> new ItemNotFoundException("Variant not found"));
-            cartItem.setVariant(variant);
-            cartItem.setProduct(variant.getProduct());
+            product = variant.getProduct();
         } else {
-            Product product = productRepository.findActiveById(dto.getProductId())
+            product = productRepository.findActiveById(dto.getProductId())
                     .orElseThrow(() -> new ItemNotFoundException("Product not found"));
-            cartItem.setProduct(product);
         }
 
-        cartItemRepository.save(cartItem);
+        CartItem existingItem = cartItemRepository
+                .findByCartIdAndProductIdAndVariantId(cart.getId(), product.getId(),
+                        variant != null ? variant.getId() : null)
+                .orElse(null);
 
-        return ApiResponse.success("Item added successfully",
-                Map.of("itemId", cartItem.getId()));
+        int requestedQty = dto.getQuantity();
+        int availableQty = (variant != null ? variant.getQuantity() : product.getQuantity());
+
+        if (existingItem != null) {
+            int newQty = existingItem.getQuantity() + requestedQty;
+            if (newQty > availableQty) {
+                return ApiResponse.error("Not enough stock available");
+            }
+            existingItem.setQuantity(newQty);
+            cartItemRepository.save(existingItem);
+            return ApiResponse.success("Item quantity updated",
+                    Map.of("itemId", existingItem.getId(), "quantity", existingItem.getQuantity()));
+        } else {
+            if (requestedQty > availableQty) {
+                return ApiResponse.error("Not enough stock available");
+            }
+            CartItem cartItem = new CartItem();
+            cartItem.setCart(cart);
+            cartItem.setProduct(product);
+            cartItem.setVariant(variant);
+            cartItem.setStatus(CartItemStatus.ACTIVE);
+            cartItem.setQuantity(requestedQty);
+            cartItemRepository.save(cartItem);
+            return ApiResponse.success("Item added successfully",
+                    Map.of("itemId", cartItem.getId(), "quantity", cartItem.getQuantity()));
+        }
     }
 
     @Override

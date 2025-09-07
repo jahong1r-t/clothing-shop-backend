@@ -81,7 +81,7 @@ public class ReviewServiceImpl implements ReviewService {
                         .build()).toList();
 
         Map<String, Object> response = new HashMap<>();
-        response.put("products", list);
+        response.put("reviews", list);
         response.put("currentPage", all.getNumber());
         response.put("totalItems", all.getTotalElements());
         response.put("totalPages", all.getTotalPages());
@@ -170,15 +170,6 @@ public class ReviewServiceImpl implements ReviewService {
         return ApiResponse.success("Review deleted successfully", null);
     }
 
-    @Override
-    public ApiResponse<?> getAverageRating(Long productId) {
-        ProductStatistic statistic = productStatisticRepository.findActiveByProductId(productId)
-                .orElseThrow(() -> new ItemNotFoundException("Product stats not found"));
 
-        return ApiResponse.success(
-                "Average rating retrieved successfully",
-                Map.of("averageRating", statistic.getRating())
-        );
-    }
 
 }

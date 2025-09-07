@@ -16,6 +16,4 @@ public interface ReviewService {
     ApiResponse<?> updateReview(User user, UUID reviewId, ReviewReqDTO dto);
 
     ApiResponse<?> deleteReview(User user, UUID reviewId);
-
-    ApiResponse<?> getAverageRating(Long productId);
 }

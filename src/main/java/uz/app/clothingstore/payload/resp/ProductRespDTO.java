@@ -1,14 +1,14 @@
 package uz.app.clothingstore.payload.resp;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductRespDTO {
     private Long id;
     private String name;

@@ -1,10 +1,12 @@
 package uz.app.clothingstore.payload.resp;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class StatisticRespDTO {
     private Long id;
     private Integer quantity;
